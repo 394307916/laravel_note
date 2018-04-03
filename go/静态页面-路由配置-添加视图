@@ -1,0 +1,83 @@
+1.首先让我们使用 Git 来新建一个 static-pages 分支。
+$ git checkout master
+$ git checkout -b static-pages
+
+上面的第一条命令 git checkout master 代表将当前分支切换到 master 分支上，
+master 分支是我们初始化 Git 时默认创建的主分支，其它分支都是基于主分支衍生出来的。
+
+第二条命令 git checkout -b static-pages 将会为你创建一个名为 static-pages 的新分支。-b 选项表示创建指定名称的新分支。
+
+合并分支示例：
+$ git merge fake-branch
+
+Laravel 默认会为我们生成一个 welcome.blade.php 视图文件，
+主要用于对默认页面进行渲染，这个文件对我们接下来的项目开发没有一点用处，因此我们可将其移除：
+$ rm resources/views/welcome.blade.php
+
+
+2.配置路由
+routes/web.php
+
+<?php
+
+Route::get('/', 'StaticPagesController@home');
+Route::get('/help', 'StaticPagesController@help');
+Route::get('/about', 'StaticPagesController@about');
+我们为 get 方法传递了两个参数，第一个参数指明了 URL，第二个参数指明了处理该 URL 的控制器动作。
+get 表明这个路由将会响应 GET 请求，并将请求映射到指定的控制器动作上。比方说，我们向 http://sample.test/ 发出了一个请求，
+则该请求将会由 StaticPagesController 的 home 方法进行处理。我们将在下节创建 StaticPagesController，为你讲解控制器在收到请求后如何进行相关操作。
+
+GET 常用于页面读取
+POST 常用于数据提交
+PATCH 常用于数据更新
+DELETE 常用于数据删除
+
+3.生成静态页面控制器
+$ php artisan make:controller StaticPagesController
+
+app/Http/Controllers/StaticPagesController.php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class StaticPagesController extends Controller
+{
+    //
+}
+
+用 use 来引用在 PHP 文件中要使用的类，引用之后便可以对其进行调用。
+
+3.添加静态页面视图
+app/Http/Controllers/StaticPagesController.php
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+
+class StaticPagesController extends Controller
+{
+    public function home()
+    {
+        return view('static_pages/home');
+    }
+
+    public function help()
+    {
+        return view('static_pages/help');
+    }
+
+    public function about()
+    {
+        return view('static_pages/about');
+    }
+}
+
+下面这行代码，将会渲染在 resources/views 文件夹下的 static_pages/home.blade.php 文件。
+默认情况下，所有的视图文件都存放在 resources/views 文件夹下。
+return view('static_pages/home');
+
+
+

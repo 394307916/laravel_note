@@ -1,0 +1,93 @@
+每个 Laravel 项目创建完成后的第一步，即是对 Homestead 进行配置，让应用能在 Homestead 的开发环境上跑起来。
+
+为了方便记忆，一般我们都会将 IP 映射为域名，我们能够通过设置 hosts 文件来指定 IP 与域名之间的映射关系，
+由于我们在 Homestead 上默认使用 192.168.10.10 来作为虚拟机的 IP 的地址，因此我们需要在系统的 hosts 文件中将域名指向该 IP 上。
+
+1.Windows 下打开 Hosts 文件：
+C:/Windows/System32/Drivers/etc/hosts
+
+文件成功打开后，在 hosts 文件最后面新增下面一行以完成设置：
+192.168.10.10   sample.test
+
+
+2.运行下面命令打开 Homestead.yaml 文件：
+> subl ~/Homestead/Homestead.yaml
+
+在 Homestead.yaml 文件中新增 sample 应用的 sites 和 databases 的相关设置：
+---
+ip: "192.168.10.10"
+memory: 2048
+cpus: 1
+provider: virtualbox
+
+authorize: ~/.ssh/id_rsa.pub
+
+keys:
+    - ~/.ssh/id_rsa
+
+folders:
+    - map: ~/Code
+      to: /home/vagrant/Code
+
+sites:
+    - map: homestead.test
+      to: /home/vagrant/Code/Laravel/public
+    - map: sample.test # <--- 这里
+      to: /home/vagrant/Code/sample/public # <--- 这里
+
+databases:
+    - homestead
+    - sample # <--- 这里
+
+variables:
+    - key: APP_ENV
+      value: local
+
+我们主要设置了 sites 和 databases 两项。
+sites 会将域名 sample.test 映射到虚拟机的 /home/vagrant/Code/sample/public 文件夹上，而 databases 则为新创建的项目指定数据库名。
+
+
+3.重启虚拟机
+在我们每次对 Homestead.yaml 文件进行了更改之后，都需要运行下面命令来使其更改生效：
+> cd ~/Homestead && vagrant provision && vagrant reload
+
+
+4.接下来，我们还需要对应用根目录下的 .env 文件进行设置，为应用指定数据库名称 sample。
+.env
+
+DB_DATABASE=sample
+
+.env 支持对应用的进行简单配置，比如你可以通过 APP_ENV 来设定当前应用的运行环境，
+使用 APP_DEBUG 来设定是否在应用报错时显示调试信息，使用 APP_KEY 来生成应用的密钥用于加密一些较为敏感的数据。
+APP_ENV=local
+APP_DEBUG=true
+APP_KEY=your_app_key
+
+我们也可以对数据库的连接方式、数据库名、用户名密码等做相关配置：
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_DATABASE=sample
+DB_USERNAME=homestead
+DB_PASSWORD=secret
+
+缓存、会话、队列等驱动的相关配置信息：
+CACHE_DRIVER=file
+SESSION_DRIVER=file
+QUEUE_DRIVER=sync
+
+Redis 相关的配置信息：
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+邮件相关的配置信息：
+MAIL_DRIVER=smtp
+MAIL_HOST=mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+
+
+
+     

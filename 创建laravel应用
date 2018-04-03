@@ -1,8 +1,8 @@
-开启 Homestead 虚拟机：
+1.开启 Homestead 虚拟机：
 > cd ~/Homestead && vagrant up
 > vagrant ssh
 
-新建一个名为 Laravel 的项目：
+2.新建一个名为 Laravel 的项目：
 $ cd ~/Code
 $ composer create-project laravel/laravel Laravel --prefer-dist "5.5.*"
 
@@ -47,7 +47,7 @@ yarn.lock	Yarn 依赖版本锁定文件
 .gitignore	被 Git 所忽略的文件
 .env	环境变量配置文件
 
-Composer 是一款跨平台的 PHP 依赖管理工具，其创作灵感来源于 Node.js 的 NPM 与 Ruby 的 Bundler。Laravel 使用 Composer 来作为扩展包的管理工具。你可以利用 Composer 结合 其它开源扩展包 来达到快速建站的目的。打开 composer.json 文件，可以看到 Laravel 默认集成了一些为框架提供支持的扩展包。
+3.Composer 是一款跨平台的 PHP 依赖管理工具，其创作灵感来源于 Node.js 的 NPM 与 Ruby 的 Bundler。Laravel 使用 Composer 来作为扩展包的管理工具。你可以利用 Composer 结合 其它开源扩展包 来达到快速建站的目的。打开 composer.json 文件，可以看到 Laravel 默认集成了一些为框架提供支持的扩展包。
 Composer 是一个伟大的发明，他让组件式编程成为可能，编写软件时，就如拼接乐高玩具一样。极大的提高了开发的效率和代码的可复用性，解放了生产力。
 composer.json：
 {

@@ -1,24 +1,26 @@
-为 GitHub 账号设置 SSH Key
-出于安全考虑，Github 服务器和我们本地的通讯要求使用 SSH Key 来验证。在前面『环境部署』的章节中，我们已经在主机中生成过 SSH Key，并且 Homestead 在初始化时，通过 Homestaed.yaml 文件中的 keys 选项已经把主机中的 SSH Key 私钥复制到虚拟机中，所以这里我们无需再次生成 SSH Key。
+1.为 GitHub 账号设置 SSH Key
+出于安全考虑，Github 服务器和我们本地的通讯要求使用 SSH Key 来验证。在前面『环境部署』的章节中，
+我们已经在主机中生成过 SSH Key，并且 Homestead 在初始化时，
+通过 Homestaed.yaml 文件中的 keys 选项已经把主机中的 SSH Key 私钥复制到虚拟机中，所以这里我们无需再次生成 SSH Key。
 
 接下来将 SSH Key 添加到 ssh-agent 中：
 $ eval "$(ssh-agent -s)"
 $ ssh-add ~/.ssh/id_rsa
 
-我们再回到 主机中 打印出公钥 id_rsa.pub 文件里的内容，并把输出的内容复制到剪贴板里：
+2.我们再回到 主机中 打印出公钥 id_rsa.pub 文件里的内容，并把输出的内容复制到剪贴板里：
 > cat ~/.ssh/id_rsa.pub
 
-最后我们需要将公钥添加到 GitHub 账号，先打开 Github SSH 令牌管理页面，把令牌丢上去。
+3.最后我们需要将公钥添加到 GitHub 账号，先打开 Github SSH 令牌管理页面，把令牌丢上去。
 
-在配置完 GitHub 账号之后，我们便可以开始在上面存放项目代码了。首先 新建一个 GitHub 仓库，取名为 hello_laravel，填上 Description 项目描述，
+4.在配置完 GitHub 账号之后，我们便可以开始在上面存放项目代码了。首先 新建一个 GitHub 仓库，取名为 hello_laravel，填上 Description 项目描述，
 Initialize this repository with a README 这一项无需勾选，因为 Laravel 已默认帮我们创建好了 readme.md 文件。
 
-创建完成之后，使用以下命令将代码上传到 GitHub 上（将 your_username 替换为你自己的 GitHub 用户名）：
+5.创建完成之后，使用以下命令将代码上传到 GitHub 上（将 your_username 替换为你自己的 GitHub 用户名）：
 $ cd ~/Code/Laravel
 $ git remote add origin git@github.com:your_username/hello_laravel.git
 $ git push -u origin master
 
-后面我们如果对本地代码进行了改动，只需运行这 3 条命令即可将代码推送到安全可靠的 GitHub 上：
+6.后面我们如果对本地代码进行了改动，只需运行这 3 条命令即可将代码推送到安全可靠的 GitHub 上：
 $ git add -A
 $ git commit -m "Say something"
 $ git push

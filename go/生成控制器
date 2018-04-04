@@ -1,0 +1,24 @@
+现在我们还没有用户控制器，让我们运行下面命令来生成。
+$ php artisan make:controller UsersController
+
+在路由中，我们会将用户注册页面的请求处理指定给用户控制器的 create 方法进行处理，接下来让我们完成该方法的定义。
+
+app/Http/Controllers/UsersController.php
+
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Http\Requests;
+
+class UsersController extends Controller
+{
+    public function create()
+    {
+        return view('users.create');
+    }
+}
+
+
+

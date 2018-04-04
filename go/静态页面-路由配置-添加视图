@@ -80,4 +80,34 @@ class StaticPagesController extends Controller
 return view('static_pages/home');
 
 
+4.局部视图
+首先，我们需要新建一个头部视图文件。
+resources/views/layouts/_header.blade.php
+
+我们在头部视图的文件名前面加了下划线 _
+
+现在让我们再来为应用创建一个底部视图，用于置放网站的一些基础信息。
+resources/views/layouts/_footer.blade.php
+
+在完成头部视图和底部视图的定义后，接下来便可以在 default 视图中引用这两个视图。
+resources/views/layouts/default.blade.php
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>@yield('title', 'Sample App') - Laravel 入门教程</title>
+    <link rel="stylesheet" href="/css/app.css">
+  </head>
+  <body>
+    @include('layouts._header')
+
+    <div class="container">
+      <div class="col-md-offset-1 col-md-10">
+        @yield('content')
+        @include('layouts._footer')
+      </div>
+    </div>
+  </body>
+</html>
+
+@include 是 Blade 提供的视图引用方法，可通过传参一个具体的文件路径名称来引用视图。
 

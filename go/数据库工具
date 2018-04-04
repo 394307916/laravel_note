@@ -1,0 +1,18 @@
+开发时，我们使用的是 Homestead 虚拟机里的 MySQL 数据库。为了方便调试和查看数据，我们需要在主机中安装 MySQL 数据库查看工具，
+然后连接到 虚拟机里的 MySQL 数据库服务器。
+
+Homestead 虚拟机里的 MySQL 数据库服务器连接方式为：
+
+Host: 127.0.0.1
+Port: 33060
+User: homestead
+Pass: secret
+注意此处使用了 VirtualBox 虚拟机的『端口转发』功能，Homestead 脚本默认将本机端口 33060 转发到虚拟机里的 3306 端口。
+所以，只要我们连接本机的 33060 端口，即可读取虚拟机中的 MySQL 数据库。
+
+我们需要运行下面的命令来生成执行迁移，migrate 命令会执行所有未被执行过的迁移。
+$ php artisan migrate
+
+在日常开发中，我们有时候也需要通过下面的方式来回滚到最近一次执行的迁移。回滚执行成功后，两个表都将被删除。
+$ php artisan migrate:rollback
+

@@ -2,7 +2,7 @@ Laravel 遵从 RESTful 架构的设计原则，将数据看做一个资源，由
 对资源进行的获取、创建、修改和删除操作，分别对应 HTTP 协议提供的 GET、POST、PATCH 和 DELETE 方法。
 当我们要查看一个 id 为 1 的用户时，需要向 /users/1 地址发送一个 GET 请求，当 Laravel 的路由接收到该请求时，
 默认会把该请求传给控制器的 show 方法进行处理。
-
+-----------------------------------------------------------------------------------------------------------------------------------
 Laravel 为我们提供了 resource 方法来定义用户资源路由。
 
 routes/web.php
@@ -40,7 +40,7 @@ GET	/users/{user}/edit	UsersController@edit	编辑用户个人资料的页面
 PATCH	/users/{user}	UsersController@update	更新用户
 DELETE	/users/{user}	UsersController@destroy	删除用户
 
-
+----------------------------------------------------------------------------------------------------------------------------------
 UsersController 的 show 方法定义如下。
 
 app/Http/Controllers/UsersController.php
@@ -98,7 +98,7 @@ resources/views/users/show.blade.php
 由于我们使用了 view('users.show', compact('user')) 将用户数据与视图进行绑定，因此在视图中可以直接使用 $user 来访问用户实例。
 
 这时候我们再访问用户个人页面，便能够看到基本的数据展示。
-
+------------------------------------------------------------------------------------------------------------------------------------
 
 保存用户并重定向
 app/Http/Controllers/UsersController.php
@@ -170,3 +170,4 @@ resources/views/shared/_messages.blade.php
 @endforeach
 session()->has($msg) 可用于判断会话中 $msg 键对应的值是否为空，若为空则在页面上不进行显示。
 最后，我们通过 session()->get($msg) 来取出对应的值并在页面上进行显示。
+-------------------------------------------------------------------------------------------------------------------------------------

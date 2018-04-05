@@ -1,0 +1,52 @@
+用户更新
+
+路由
+Route::get('/users/{user}/edit', 'UsersController@edit')->name('users.edit');
+
+控制器
+class UsersController extends Controller
+{
+    .
+    .
+    .
+    public function edit(User $user)
+    {
+        return view('users.edit', compact('user'));
+    }
+    
+    public function update(User $user, Request $request)
+    {
+        $this->validate($request, [
+            'name' => 'required|max:50',
+            'password' => 'nullable|confirmed|min:6'
+        ]);
+
+        $data = [];
+        $data['name'] = $request->name;
+        if ($request->password) {
+            $data['password'] = bcrypt($request->password);
+        }
+        $user->update($data);
+
+        session()->flash('success', '个人资料更新成功！');
+
+        return redirect()->route('users.show', $user->id);
+    }
+}
+
+视图
+<form method="POST" action="{{ route('users.update', $user->id )}}">
+            {{ method_field('PATCH') }}
+            {{ csrf_field() }}
+
+            .
+            .
+            .
+
+编辑入口
+<li><a href="{{ route('users.show', Auth::user()->id) }}">个人中心</a></li>
+<li><a href="{{ route('users.edit', Auth::user()->id) }}">编辑资料</a></li>
+
+
+        
+        

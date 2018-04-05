@@ -1,0 +1,70 @@
+Gravatar 头像和侧边栏
+现在，我们要为用户的个人页面添加头像显示的功能。接下来的项目开发将使用 Gravatar 来为用户提供个人头像支持。Gravatar 为 “全球通用头像”，当你在 Gravatar 的服务器上放置了自己的头像后，可通过将自己的 Gravatar 登录邮箱进行 MD5 转码，并与 Gravatar 的 URL 进行拼接来获取到自己的 Gravatar 头像。
+
+接下来让我们在用户模型中定义一个 gravatar 方法，用来生成用户的头像。
+
+app/Models/User.php
+
+<?php
+
+namespace App\Models;
+.
+.
+.
+class User extends Authenticatable
+{
+    .
+    .
+    .
+    public function gravatar($size = '100')
+    {
+        $hash = md5(strtolower(trim($this->attributes['email'])));
+        return "http://www.gravatar.com/avatar/$hash?s=$size";
+    }
+}    
+该方法主要做了以下几个操作：
+
+为 gravatar 方法传递的参数 size 指定了默认值 100；
+通过 $this->attributes['email'] 获取到用户的邮箱；
+使用 trim 方法剔除邮箱的前后空白内容；
+用 strtolower 方法将邮箱转换为小写；
+将小写的邮箱使用 md5 方法进行转码；
+将转码后的邮箱与链接、尺寸拼接成完整的 URL 并返回；
+定义好 gravatar 方法之后，我们便可以在视图中通过以下方式进行调用：
+
+使用默认尺寸来获取头像：
+
+$user->gravatar();
+为 gravatar 指定尺寸大小来获取头像：
+
+$user->gravatar('140');
+接下来让我们来构建一个全局通用的局部视图，用于展示用户的头像和用户名等基本信息。
+
+resources/views/shared/_user_info.blade.php
+
+<a href="{{ route('users.show', $user->id) }}">
+  <img src="{{ $user->gravatar('140') }}" alt="{{ $user->name }}" class="gravatar"/>
+</a>
+<h1>{{ $user->name }}</h1>
+该视图将被嵌套在用户个人页面中进行使用，因此我们需要对用户个人页面进行更改，加入我们新创建的用户信息局部视图。
+
+resources/views/users/show.blade.php
+
+@extends('layouts.default')
+@section('title', $user->name)
+@section('content')
+<div class="row">
+  <div class="col-md-offset-2 col-md-8">
+    <div class="col-md-12">
+      <div class="col-md-offset-2 col-md-8">
+        <section class="user_info">
+          @include('shared._user_info', ['user' => $user])
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+@stop
+我们可以通过给 @include 方法传参，将用户数据以关联数组的形式传送到 _user_info 局部视图上。
+
+@include('shared._user_info', ['user' => $user])

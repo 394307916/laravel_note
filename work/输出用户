@@ -1,0 +1,37 @@
+class UsersController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth', [
+            'except' => ['show', 'create', 'store', 'index']
+        ]);
+        .
+        .
+        .
+    }
+
+    public function index()
+    {
+        $users = User::all();
+        return view('users.index', compact('users'));
+    }
+    .
+    .
+    .
+}
+
+可以看到，在 index 方法中，我们使用 Eloquent 用户模型将所有用户的数据一下子完全取出来了，这么做会影响应用的性能，后面我们再来对该代码进行优化，
+通过分页的方式来读取用户数据。在将用户数据取出之后，与 index 视图进行绑定，这样便可以在视图中使用 $users 来访问所有用户实例。
+
+  <ul class="users">
+    @foreach ($users as $user)
+      <li>
+        <img src="{{ $user->gravatar() }}" alt="{{ $user->name }}" class="gravatar"/>
+        <a href="{{ route('users.show', $user->id )}}" class="username">{{ $user->name }}</a>
+      </li>
+    @endforeach
+  </ul>
+  
+  视图显示用户
+  
+  

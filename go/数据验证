@@ -1,0 +1,42 @@
+接下来让我来讲解下新增的 store 方法。
+
+public function store(Request $request)
+{
+    $this->validate($request, [
+        'name' => 'required|max:50',
+        'email' => 'required|email|unique:users|max:255',
+        'password' => 'required|confirmed|min:6'
+    ]);
+    return;
+}
+在实际开发中，我们经常需要对用户输入的数据进行 验证，在验证成功后再将数据存入数据库。在 Laravel 开发中，提供了多种数据验证方式，在本教程中，我们使用其中一种对新手较为友好的验证方式 - validator 来进行讲解。validator 由 App\Http\Controllers\Controller 类中的 ValidatesRequests 进行定义，因此我们可以在所有的控制器中使用 validate 方法来进行数据验证。validate 方法接收两个参数，第一个参数为用户的输入数据，第二个参数为该输入数据的验证规则。
+
+验证规则
+下面来看下我们在验证用户数据时，都用到了哪几种验证规则。
+
+存在性验证
+在用户填写表单的时候，我们会要求用户必须填写上自己的用户名，当用户名为空时将注册失败。
+
+这时我们可以使用 required 来验证用户名是否为空。
+
+'name' => 'required'
+长度验证
+我们还可以使用 min 和 max 来限制用户名所填写的最小长度和最大长度。
+
+'name' => 'min:3|max:50'
+如果需要同时验证多个条件时，则可使用 | 对验证规则进行分割。
+
+格式验证
+在其它的一些应用上，如果要对用户邮箱进行验证，则可能需要你写一段非常冗长且不易理解的 正则表达式 来匹配邮箱格式。但在 Laravel 中，我们只需简单的使用 email 便能够完成邮箱格式的验证。
+
+'email' => 'email'
+唯一性验证
+一般情况下，我们还需要验证用户使用的注册邮箱是否已被它人使用，这时我们可以使用唯一性验证，这里是针对于数据表 users 做验证。
+
+'email' => 'unique:users'
+但这种验证方式还是不够严谨，所以我们需要在一开始创建 用户数据表 时便设置邮箱字段的唯一属性。这个 Laravel 在默认给我们生成的用户表迁移文件中便已经默认设定好了。
+
+密码匹配验证
+如果我们需要确保用户在输入密码时，保证两次输入的密码一致。这时候则可以使用 confirmed 来进行密码匹配验证。
+
+'password' => 'confirmed'

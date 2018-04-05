@@ -1,0 +1,35 @@
+添加语言包
+通过页面显示我们可以看到，这时的报错信息显示的还是英文。Laravel 为消息验证的多语言提供了一种非常简便的方法进行支持。我们可以通过添加一个如 resources/lang/xx/validation.php 语言包，并在语言包的 custom 数组中对翻译语言进行设定。如：
+
+'custom' => [
+    'email' => [
+        'required' => '邮箱地址不能为空！',
+    ],
+],
+这是非常通用的功能，所以在 GitHub 上有人专门为此写了一个扩展包 - overtrue/laravel-lang 来对 Laravel 提供默认提示信息添加多语言版本翻译。
+
+接下来让我们使用 Composer 来安装 laravel-lang。
+
+$ composer require "overtrue/laravel-lang:~3.0"
+由于该包已经配置了包的自动注册(Package Auto-Discovery) ，所以不需要你在配置文件去注册服务提供器即可使用。
+
+最后，我们还需要将项目语言设置为中文。
+
+config/app.php
+
+<?php
+
+return [
+    .
+    .
+    .
+    'locale' => 'zh-CN',
+    .
+    .
+    .
+];    
+现在再次提交验证不通过的信息，能看到错误提示已变成中文。
+
+如果你需要对属性或者验证消息改写，
+直接在 resources/lang/xx/validation.php 中编写你需要定制的部分即可，
+更多使用方式请参考https://github.com/overtrue/laravel-lang/blob/master/README_CN.md中文使用说明

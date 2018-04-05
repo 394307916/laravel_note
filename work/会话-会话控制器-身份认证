@@ -1,0 +1,90 @@
+会话控制器
+首先我们要新建一个会话控制器，该控制器将用于处理用户登录退出相关的操作。
+你可以把会话理解为我们之前谈到过的资源，当用户登录成功时，会话将被创建；当用户退出登录时，会话会被销毁。
+只是在这里会话并不会保存到数据库中，而是保存在浏览器上。让我们运行下面命令来生成会话控制器。
+
+$ php artisan make:controller SessionsController
+
+Route::get('login', 'SessionsController@create')->name('login');
+Route::post('login', 'SessionsController@store')->name('login');
+Route::delete('logout', 'SessionsController@destroy')->name('logout');
+新增的路由功能如下。
+
+HTTP 请求	URL	动作	作用
+GET	/login	SessionsController@create	显示登录页面
+POST	/login	SessionsController@store	创建新会话（登录）
+DELETE	/logout	SessionsController@destroy	销毁会话（退出登录）
+
+class SessionsController extends Controller
+{
+    public function create()
+    {
+        return view('sessions.create');
+    }
+}
+
+<form method="POST" action="{{ route('login') }}">
+我们在前面新增的路由中，有两个路由的命名完全一致，但由于我们在表单中清楚的指明了使用 POST 动作来提交用户的登录信息，
+因此 Laravel 会自动将该请求映射到会话控制器的 store 动作上。
+
+Route::get('login', 'SessionsController@create')->name('login');
+Route::post('login', 'SessionsController@store')->name('login');
+----------------------------------------------------------------------------------------------------------------------------------------
+身份认证:
+public function store(Request $request)
+    {
+       $credentials = $this->validate($request, [
+           'email' => 'required|email|max:255',
+           'password' => 'required'
+       ]);
+
+       if (Auth::attempt($credentials)) {
+           session()->flash('success', '欢迎回来！');
+           return redirect()->route('users.show', [Auth::user()]);
+       } else {
+           session()->flash('danger', '很抱歉，您的邮箱和密码不匹配');
+           return redirect()->back();
+       }
+    }
+---------------------------------------------------------------------------------------------------------------------------------------
+Laravel 提供了 Auth::check() 方法用于判断当前用户是否已登录，已登录返回 true，未登录返回 false。
+
+         @if (Auth::check())
+            <li><a href="#">用户列表</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                {{ Auth::user()->name }} <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="{{ route('users.show', Auth::user()->id) }}">个人中心</a></li>
+                <li><a href="#">编辑资料</a></li>
+                <li class="divider"></li>
+                <li>
+                  <a id="logout" href="#">
+                    <form action="{{ route('logout') }}" method="POST">
+                      {{ csrf_field() }}
+                      {{ method_field('DELETE') }}
+                      <button class="btn btn-block btn-danger" type="submit" name="button">退出</button>
+                    </form>
+                  </a>
+                </li>
+              </ul>
+            </li>
+          @else
+            <li><a href="{{ route('help') }}">帮助</a></li>
+            <li><a href="{{ route('login') }}">登录</a></li>
+          @endif
+
+<form action="{{ route('logout') }}" method="POST">
+  {{ csrf_field() }}
+  {{ method_field('DELETE') }}
+  <button class="btn btn-block btn-danger" type="submit" name="button">退出</button>
+</form>
+可以看到用户退出登录的按钮实际上是一个表单的提交按钮，在点击退出按钮之后浏览器将向 /logout 地址发送一个 POST 请求。但由于 RESTful 架构中会使用 DELETE 请求来删除一个资源，当用户退出时，实际上相当于删除了用户登录会话的资源，因此这里的退出操作需要使用 DELETE 请求来发送给服务器。由于浏览器不支持发送 DELETE 请求，因此我们需要使用一个隐藏域来伪造 DELETE 请求。
+
+在 Blade 模板中，我们可以使用 method_field 方法来创建隐藏域。
+
+{{ method_field('DELETE') }}
+
+
+

@@ -1,0 +1,117 @@
+我们给应用创建了一个 default 视图，并将其放在 layouts 文件夹中，default 视图将作为整个应用的基础视图。
+实际上你只要保证视图文件被放置在 resources/views 目录下即可，Laravel 对视图的文件夹和文件命名并没有限制，
+我将 default 文件放在 layouts 文件下，只是为了让应用的目录结构让人更好理解。
+
+resources/views/layouts/default.blade.php
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sample App</title>
+  </head>
+  <body>
+    @yield('content')
+  </body>
+</html>
+
+下面的这行代码表示该占位区域将用于显示 content 区块的内容，而 content 区块的内容将由继承自 default 视图的子视图定义
+@yield('content')
+
+Laravel 的 Blade 模板支持继承，这意味多个子视图可以共用父视图提供的视图模板。
+接下来让我们修改之前创建的首页视图文件，来学习下如何使用 Blade 模板的继承。
+
+resources/views/static_pages/home.blade.php
+@extends('layouts.default')
+@section('content')
+  <h1>主页</h1>
+@stop
+
+我们使用了 @extends 并通过传参来继承父视图 layouts/default.blade.php 的视图模板。
+@extends('layouts.default')
+
+使用 @section 和 @stop 代码来填充父视图的 content 区块，所有包含在 @section 和 @stop 中的代码都将被插入到父视图的 content 区块。
+@section('content')
+  <h1>主页</h1>
+@stop
+
+resources/views/layouts/default.blade.php
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>@yield('title', 'Sample')</title>
+  </head>
+  <body>
+    @yield('content')
+  </body>
+</html>
+
+我们给 @yield 传了两个参数，第一个参数是该区块的变量名称，第二个参数是默认值，表示当指定变量的值为空值时，使用 Sample 来作为默认值。
+<title>@yield('title', 'Sample')</title>
+
+下面让我们来为帮助页和关于页加上指定标题。
+resources/views/static_pages/help.blade.php
+
+@extends('layouts.default')
+@section('title', '帮助')
+
+@section('content')
+  <h1>帮助页</h1>
+@stop
+
+
+显示表单错误信息
+目前是我们尝试填写完表单，如果表单信息填写有误并提交，页面不会展示报错信息。
+Laravel 默认给我们提供了一种非常好的展示错误信息的方法，现在让我们来为应用加上提交失败时的错误信息展示。
+
+resources/views/shared/_errors.blade.php
+
+@if (count($errors) > 0)
+  <div class="alert alert-danger">
+      <ul>
+          @foreach($errors->all() as $error)
+          <li>{{ $error }}</li>
+          @endforeach
+      </ul>
+  </div>
+@endif
+通过上面代码我们可以看到 Blade 模板还为我们提供了一些其它的便利方法，如：
+
+@if (count($errors) > 0)
+    {{ count($errors) }}
+@endif
+在解析成 PHP 代码后为：
+
+if (count($errors) > 0) {
+    {{ count($errors) }}
+}
+Blade 支持所有的循环语句和条件判断语句，如 @if, @elseif, @else, @for, @foreach, @while 等等，应用在 Blade 中的表达式都需要以 @ 开头。
+
+Laravel 默认会将所有的验证错误信息进行闪存。当检测到错误存在时，Laravel 会自动将这些错误消息绑定到视图上，因此我们可以在所有的视图上使用 errors 变量来显示错误信息。需要注意的是，在我们对 errors 进行使用时，要先使用 count($errors) 检查其值是否为空。
+
+定义好错误消息局部视图，便可以在用户的注册表单中对该视图进行引用。
+
+resources/views/users/create.blade.php
+
+@extends('layouts.default')
+@section('title', '注册')
+
+@section('content')
+<div class="col-md-offset-2 col-md-8">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h5>注册</h5>
+    </div>
+    <div class="panel-body">
+      @include('shared._errors')
+
+      <form method="POST" action="{{ route('users.store') }}">
+          {{ csrf_field() }}
+
+          <div class="form-group">
+            <label for="name">名称：</label>
+            <input type="text" name="name" class="form-control" value="{{ old('name') }}">
+          </div>
+          .
+          .
+          .
+@stop
+

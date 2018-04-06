@@ -1,0 +1,68 @@
+2. 邮箱发送配置
+Laravel 中邮箱发送的配置存放于 config/mail.php 中。不过 mail.php 中我们所需的配置，都可以通过 .env 来配置。
+作为最佳实践，我们优先选择通过环境变量来配置：
+
+.env
+
+.
+.
+.
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.qq.com
+MAIL_PORT=25
+MAIL_USERNAME=xxxxxxxxxxxxxx@qq.com
+MAIL_PASSWORD=xxxxxxxxx
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=xxxxxxxxxxxxxx@qq.com
+MAIL_FROM_NAME=SampleApp
+.
+.
+.
+选项讲解：
+
+MAIL_DRIVER=smtp —— 使用支持 ESMTP 的 SMTP 服务器发送邮件；
+MAIL_HOST=smtp.qq.com —— QQ 邮箱的 SMTP 服务器地址，必须为此值；
+MAIL_PORT=25 —— QQ 邮箱的 SMTP 服务器端口，必须为此值；
+MAIL_USERNAME=xxxxxxxxxxxxxx@qq.com —— 请将此值换为你的 QQ + @qq.com；
+MAIL_PASSWORD=xxxxxxxxx —— 密码是我们第一步拿到的授权码；
+MAIL_ENCRYPTION=tls —— 加密类型，选项 null 表示不使用任何加密，其他选项还有 ssl，这里我们使用 tls 即可。
+MAIL_FROM_ADDRESS=xxxxxxxxxxxxxx@qq.com —— 此值必须同 MAIL_USERNAME 一致；
+MAIL_FROM_NAME=SampleApp —— 用来作为邮件的发送者名称。
+接着我们要对 Heroku 应用进行配置，参照上 .env 里的信息：
+
+$ heroku config:set MAIL_DRIVER=smtp
+$ heroku config:set MAIL_HOST=smtp.qq.com
+$ heroku config:set MAIL_PORT=25
+$ heroku config:set MAIL_USERNAME=xxxxxxxxxxxxxx@qq.com
+$ heroku config:set MAIL_PASSWORD=xxxxxxxxx
+$ heroku config:set MAIL_ENCRYPTION=tls
+$ heroku config:set MAIL_FROM_ADDRESS=xxxxxxxxxxxxxx@qq.com
+$ heroku config:set MAIL_FROM_NAME=SampleApp
+历史遗留问题
+还记得 账户激活 一节的邮件发送逻辑吗？现在我们已经在环境配置文件完善了邮件的发送配置，因此不再需要使用 from 方法：
+
+app/Http/Controllers/UsersController.php
+
+<?php
+
+.
+.
+.
+
+class UsersController extends Controller
+{
+    .
+    .
+    .
+    protected function sendEmailConfirmationTo($user)
+    {
+        $view = 'emails.confirm';
+        $data = compact('user');
+        $to = $user->email;
+        $subject = "感谢注册 Sample 应用！请确认你的邮箱。";
+
+        Mail::send($view, $data, function ($message) use ($to, $subject) {
+            $message->to($to)->subject($subject);
+        });
+    }
+}

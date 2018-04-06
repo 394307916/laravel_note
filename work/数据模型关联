@@ -280,3 +280,139 @@ resources/views/users/show.blade.php
 @stop
 在个人页面视图中，我们使用了 count($statuses) 方法来判断当前页面是否存在微博动态，如果不存在则不对微博的局部视图和分页链接进行渲染。
 现在视图已经构建完成，让我们针对用户微博的显示进行样式优化。
+---------------------------------------------------------------------------------------------------------------------------------
+$ php artisan make:migration create_followers_table --create="followers"
+
+并在该迁移文件中增加两个字段 user_id 和 follower_id 用于接下来的操作。
+
+database/migrations/[timestamp]_create_followers_table.php
+
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class CreateFollowersTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('followers', function (Blueprint $table) {
+            $table->increments('id');
+            $table->integer('user_id')->index();
+            $table->integer('follower_id')->index();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('followers');
+    }
+}
+
+
+在用户关注功能中，一个用户（粉丝）能够关注多个人，而被关注者能够拥有多个粉丝，
+像这种关系我们称之为「多对多关系」。在 Laravel 中我们使用 belongsToMany 来关联模型之间的多对多关系。
+以粉丝为例，一个用户能够拥有多个粉丝，因此我们在用户模型中可以像这样定义：
+
+public function followers()
+{
+    return $this->belongsToMany(User::Class);
+}
+在 Laravel 中会默认将两个关联模型的名称进行合并并按照字母排序，
+因此我们生成的关联关系表名称会是 followers_user。我们也可以自定义生成的名称，把关联表名改为 followers。
+
+public function followers()
+{
+    return $this->belongsToMany(User::Class, 'followers');
+}
+
+除了自定义合并数据表的名称，我们也可以通过传递额外参数至 belongsToMany 方法来自定义数据表里的字段名称。如下：
+
+public function followers()
+{
+    return $this->belongsToMany(User::Class, 'followers', 'user_id', 'follower_id');
+}
+
+belongsToMany 方法的第三个参数 user_id 是定义在关联中的模型外键名，而第四个参数 follower_id 则是要合并的模型外键名。
+
+因此，最终我们在用户模型中定义的关联如下：
+
+app/Models/User.php
+
+<?php
+
+namespace App\Models;
+.
+.
+.
+class User extends Authenticatable
+{
+    .
+    .
+    .
+    public function followers()
+    {
+        return $this->belongsToMany(User::Class, 'followers', 'user_id', 'follower_id');
+    }
+
+    public function followings()
+    {
+        return $this->belongsToMany(User::Class, 'followers', 'follower_id', 'user_id');
+    }
+}  
+
+我们可以通过 followers 来获取粉丝关系列表，如：
+
+$user->followers();
+
+通过 followings 来获取用户关注人列表，如：
+
+$user->followings();
+
+app/Models/User.php
+
+<?php
+
+namespace App\Models;
+.
+.
+.
+class User extends Authenticatable
+{
+    .
+    .
+    .
+    public function follow($user_ids)
+    {
+        if (!is_array($user_ids)) {
+            $user_ids = compact('user_ids');
+        }
+        $this->followings()->sync($user_ids, false);
+    }
+
+    public function unfollow($user_ids)
+    {
+        if (!is_array($user_ids)) {
+            $user_ids = compact('user_ids');
+        }
+        $this->followings()->detach($user_ids);
+    }
+    
+    public function isFollowing($user_id)
+    {
+        return $this->followings->contains($user_id);
+    }
+    
+}    

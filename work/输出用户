@@ -32,6 +32,58 @@ class UsersController extends Controller
     @endforeach
   </ul>
   
-  视图显示用户
-  
+----------------------------------------------------------------------------------------------------------------------------------------
+分页
+现在我们已拥有足够多的用户了，接下来让我们着手开发用户列表页面的分页功能。
+在 Laravel 应用中，分页功能的开发非常简单，接下来让我们看下具体如何实现。
+
+首先，我们需要先对用户控制器中获取所有用户数据的方法进行更改，修改如下。
+
+app/Http/Controllers/UsersController.php
+
+<?php
+
+namespace App\Http\Controllers;
+.
+.
+.
+class UsersController extends Controller
+{
+    .
+    .
+    .
+    public function index()
+    {
+        $users = User::paginate(10);
+        return view('users.index', compact('users'));
+    }
+.
+.
+.    
+在调用 paginate 方法获取用户列表之后，便可以通过以下代码在用户列表页上渲染分页链接。
+
+{!! $users->render() !!}
+
+我们对用户列表页视图进行修改，加上渲染分页视图的代码。
+
+resources/views/users/index.blade.php
+
+@extends('layouts.default')
+@section('title', '所有用户')
+
+@section('content')
+<div class="col-md-offset-2 col-md-8">
+  <h1>所有用户</h1>
+  <ul class="users">
+    @foreach ($users as $user)
+      <li>
+        <img src="{{ $user->gravatar() }}" alt="{{ $user->name }}" class="gravatar"/>
+        <a href="{{ route('users.show', $user->id )}}" class="username">{{ $user->name }}</a>
+      </li>
+    @endforeach
+  </ul>
+
+  {!! $users->render() !!}
+</div>
+@stop
   

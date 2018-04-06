@@ -249,3 +249,74 @@ class DatabaseSeeder extends Seeder
 最后让我们对数据库进行重置和填充。
 
 $ php artisan migrate:refresh --seed
+----------------------------------------------------------------------------------------------------------------------------
+前并没有一个用户拥有大量的粉丝或关注了多个人，接下来我们需要用数据填充的方式，为第一个用户添加假数据，让他拥有一些关注人和粉丝。
+
+首先我们需要生成一个数据填充文件。
+
+$ php artisan make:seeder FollowersTableSeeder
+我们会使用第一个用户对除自己以外的用户进行关注，接着再让所有用户去关注第一个用户。假数据的生成代码如下所示：
+
+database/seeds/FollowersTableSeeder.php
+
+<?php
+
+use Illuminate\Database\Seeder;
+use App\Models\User;
+
+class FollowersTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $users = User::all();
+        $user = $users->first();
+        $user_id = $user->id;
+
+        // 获取去除掉 ID 为 1 的所有用户 ID 数组
+        $followers = $users->slice(1);
+        $follower_ids = $followers->pluck('id')->toArray();
+
+        // 关注除了 1 号用户以外的所有用户
+        $user->follow($follower_ids);
+
+        // 除了 1 号用户以外的所有用户都来关注 1 号用户
+        foreach ($followers as $follower) {
+            $follower->follow($user_id);
+        }
+    }
+}
+接着让我们为假数据的生成顺序进行设定。
+
+database/seeds/DatabaseSeeder.php
+
+<?php
+
+use Illuminate\Database\Seeder;
+use Illuminate\Database\Eloquent\Model;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        Model::unguard();
+
+        $this->call(UsersTableSeeder::class);
+        $this->call(StatusesTableSeeder::class);
+        $this->call(FollowersTableSeeder::class);
+
+        Model::reguard();
+    }
+}
+最后，我们还需要对数据库进行重置和填充。
+
+$ php artisan migrate:refresh --seed

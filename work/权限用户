@@ -275,3 +275,73 @@ class RedirectIfAuthenticated
         .
     }
 }
+-------------------------------------------------------------------------------------------------------------------------------
+删除动作
+app/Policies/UserPolicy.php
+
+<?php
+
+namespace App\Policies;
+
+use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Models\User;
+
+class UserPolicy
+{
+    use HandlesAuthorization;
+
+    public function update(User $currentUser, User $user)
+    {
+        return $currentUser->id === $user->id;
+    }
+
+    public function destroy(User $currentUser, User $user)
+    {
+        return $currentUser->is_admin && $currentUser->id !== $user->id;
+    }
+}
+
+我们使用了下面这行代码来指明，只有当前用户拥有管理员权限且删除的用户不是自己时才显示链接。
+$currentUser->is_admin && $currentUser->id !== $user->id;
+
+Laravel 授权策略提供了 @can Blade 命令，允许我们在 Blade 模板中做授权判断。接下来让我们利用 @can 指令，
+在用户列表页加上只有管理员才能看到的删除用户按钮。
+
+resources/views/users/_user.blade.php
+
+<li>
+    <img src="{{ $user->gravatar() }}" alt="{{ $user->name }}" class="gravatar"/>
+    <a href="{{ route('users.show', $user->id )}}" class="username">{{ $user->name }}</a>
+
+    @can('destroy', $user)
+      <form action="{{ route('users.destroy', $user->id) }}" method="post">
+        {{ csrf_field() }}
+        {{ method_field('DELETE') }}
+        <button type="submit" class="btn btn-sm btn-danger delete-btn">删除</button>
+      </form>
+    @endcan
+</li>
+
+控制器操作
+app/Http/Controllers/UsersController.php
+
+<?php
+
+namespace App\Http\Controllers;
+.
+.
+.
+class UsersController extends Controller
+{
+    .
+    .
+    .
+    public function destroy(User $user)
+    {
+        $this->authorize('destroy', $user);
+        $user->delete();
+        session()->flash('success', '成功删除用户！');
+        return back();
+    }
+}
+------------------------------------------------------------------------------------------------------------------------------

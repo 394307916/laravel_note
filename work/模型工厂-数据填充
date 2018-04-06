@@ -161,3 +161,91 @@ $ php artisan db:seed --class=UsersTableSeeder
 你也可以使用下面一条命令来同时完成数据库的重置和填充操作：
 
 $ php artisan migrate:refresh --seed
+--------------------------------------------------------------------------------------------------------------------------
+示例微博
+现在我们的用户还没有办法发布任何微博，因为我们的微博发布表单还未构建，但通过前面章节的学习，
+我们知道可以使用 Laravel 提供的数据填充功能来为应用生成测试数据。
+
+首先我们需要为「微博模型」定义好用来生成的假数据的「模型工厂」。我们可以利用 Laravel 命令 make:factory 来生成工厂类文件：
+
+$ php artisan make:factory StatusFactory
+内容填入：
+
+database/factories/StatusFactory.php
+
+<?php
+
+use Faker\Generator as Faker;
+
+$factory->define(App\Models\Status::class, function (Faker $faker) {
+    $date_time = $faker->date . ' ' . $faker->time;
+    return [
+        'content'    => $faker->text(),
+        'created_at' => $date_time,
+        'updated_at' => $date_time,
+    ];
+});
+接着创建一个 StatusesTableSeeder 文件来对微博假数据进行批量生成。
+
+$ php artisan make:seeder StatusesTableSeeder
+我们不需要为每个用户都生成大量微博，为了测试方便且提高假数据的生成速度，我们只为前三个用户生成共 100 条微博假数据。
+
+database/seeds/StatusesTableSeeder.php
+
+<?php
+
+use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\Status;
+
+class StatusesTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $user_ids = ['1','2','3'];
+        $faker = app(Faker\Generator::class);
+
+        $statuses = factory(Status::class)->times(100)->make()->each(function ($status) use ($faker, $user_ids) {
+            $status->user_id = $faker->randomElement($user_ids);
+        });
+
+        Status::insert($statuses->toArray());
+    }
+}
+我们通过 app() 方法来获取一个 Faker 容器 的实例，并借助 randomElement 方法来取出用户 id 数组中的任意一个元素并赋值给微博的 user_id，
+使得每个用户都拥有不同数量的微博。
+
+接下来我们需要在 DatabaseSeeder 类中指定调用微博数据填充文件。
+
+database/seeds/DatabaseSeeder.php
+
+<?php
+
+use Illuminate\Database\Seeder;
+use Illuminate\Database\Eloquent\Model;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        Model::unguard();
+
+        $this->call(UsersTableSeeder::class);
+        $this->call(StatusesTableSeeder::class);
+
+        Model::reguard();
+    }
+}
+最后让我们对数据库进行重置和填充。
+
+$ php artisan migrate:refresh --seed
